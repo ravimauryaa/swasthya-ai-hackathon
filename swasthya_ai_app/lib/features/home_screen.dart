@@ -2,12 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
-import '../models/triage_model.dart';
 import '../services/api_service.dart';
 import 'result_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  // Removed const to allow rebuilding when tab switches
   HomeScreen({super.key});
 
   @override
@@ -15,13 +13,10 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final ApiService _apiService = ApiService();
   final TextEditingController _symptomController = TextEditingController();
-  
   late stt.SpeechToText _speechToText;
   bool _isListening = false;
   String _selectedLocaleId = 'en_US'; 
-  bool _isLoading = false;
 
   @override
   void initState() {
@@ -58,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> _analyzeSymptoms() async {
+  void _goToResult() {
     if (_symptomController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(_selectedLocaleId == 'hi_IN' ? 'कृपया पहले अपने लक्षण बताएं।' : 'Please describe your symptoms first.')),
@@ -67,44 +62,24 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     FocusScope.of(context).unfocus(); 
-    setState(() => _isLoading = true);
 
-    try {
-      String requestedLanguage = _selectedLocaleId == 'hi_IN' ? 'Hindi' : 'English';
-      
-      // Global Profile Data Backend Ko Bheja Ja Raha Hai
-      TriageModel result = await _apiService.getTriageResult(
-        _symptomController.text, 
-        requestedLanguage,
-        patientHistory: ApiService.currentPatientProfile, 
-      );
-      
-      setState(() => _isLoading = false);
-
-      if (mounted) {
-        await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ResultScreen(triageResult: result),
-          ),
-        );
-        setState(() {
-          _symptomController.clear();
-        });
-      }
-    } catch (e) {
-      setState(() => _isLoading = false);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error connecting to AI. Please try again.')),
-        );
-      }
-    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ResultScreen(
+          symptoms: _symptomController.text,
+          language: _selectedLocaleId == 'hi_IN' ? 'Hindi' : 'English',
+        ),
+      ),
+    ).then((_) {
+      setState(() {
+        _symptomController.clear();
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    // Check if profile is linked
     bool isProfileLinked = ApiService.currentPatientProfile != null;
 
     return SafeArea(
@@ -116,6 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                // Header Row
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -130,7 +106,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // DYNAMIC NAME LOGIC
                             Text(
                               _selectedLocaleId == 'hi_IN' 
                                   ? "नमस्ते, ${isProfileLinked ? ApiService.currentPatientProfile!['name'].split(' ')[0] : 'उपयोगकर्ता'}" 
@@ -152,36 +127,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
                 
-                const SizedBox(height: 20),
+                const SizedBox(height: 40),
 
-                // DYNAMIC BADGE LOGIC
-                if (isProfileLinked)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF0FDF4),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.green.shade300),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.verified_user, color: Colors.green, size: 18),
-                        const SizedBox(width: 8),
-                        Text(
-                          "Linked: ${ApiService.currentPatientProfile!['name']}",
-                          style: TextStyle(
-                            color: Colors.green.shade800, 
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                const SizedBox(height: 30),
-
+                // Mic Card
                 Container(
                   padding: const EdgeInsets.all(30),
                   decoration: BoxDecoration(
@@ -246,6 +194,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 
                 const SizedBox(height: 24),
 
+                // Language Toggle
                 Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
@@ -265,6 +214,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 
                 const SizedBox(height: 24),
 
+                // Transcript Card
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
@@ -302,6 +252,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
+          // Analyze Button
           Positioned(
             bottom: 20,
             left: 24,
@@ -309,7 +260,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: SizedBox(
               height: 56,
               child: ElevatedButton(
-                onPressed: _isLoading ? null : _analyzeSymptoms,
+                onPressed: _goToResult,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0F766E),
                   foregroundColor: Colors.white,
@@ -317,15 +268,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   elevation: 5,
                   shadowColor: const Color(0xFF0F766E).withOpacity(0.5),
                 ),
-                child: _isLoading 
-                    ? const SizedBox(
-                        height: 24, width: 24, 
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
-                      )
-                    : Text(
-                        _selectedLocaleId == 'hi_IN' ? "लक्षणों का विश्लेषण करें" : "Analyze Symptoms", 
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)
-                      ),
+                child: Text(
+                  _selectedLocaleId == 'hi_IN' ? "लक्षणों का विश्लेषण करें" : "Analyze Symptoms", 
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)
+                ),
               ),
             ),
           ),
