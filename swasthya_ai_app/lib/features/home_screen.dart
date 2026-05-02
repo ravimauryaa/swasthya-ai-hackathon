@@ -4,6 +4,7 @@ import 'package:avatar_glow/avatar_glow.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../services/api_service.dart';
 import 'result_screen.dart';
+import 'profile_screen.dart'; // 👈 Naya Import: Profile Screen ke liye
 
 class HomeScreen extends StatefulWidget {
   HomeScreen({super.key});
@@ -97,10 +98,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Row(
                       children: [
-                        const CircleAvatar(
-                          radius: 24,
-                          backgroundColor: Color(0xFF0F766E),
-                          child: Icon(Icons.person, color: Colors.white), 
+                        // 👈 Naya Navigation Logic: Avatar par click karte hi Profile khulegi
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                            );
+                          },
+                          child: const CircleAvatar(
+                            radius: 24,
+                            backgroundColor: Color(0xFF0F766E),
+                            child: Icon(Icons.person, color: Colors.white), 
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Column(

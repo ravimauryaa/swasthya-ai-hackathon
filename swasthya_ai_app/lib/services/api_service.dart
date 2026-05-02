@@ -1,3 +1,4 @@
+// lib/services/api_service.dart
 import 'package:dio/dio.dart';
 import '../models/triage_model.dart';
 
@@ -10,7 +11,7 @@ class ApiService {
   // REPLACE with your actual Laptop IP Address
   final String _apiUrl = "http://10.132.200.129:8000"; 
 
-  // NEW METHOD: Fetch ABHA Profile
+  // METHOD 1: Fetch ABHA Profile
   Future<Map<String, dynamic>?> fetchPatientHistory(String abhaId) async {
     try {
       final response = await _dio.get("$_apiUrl/api/v1/abha/patient/$abhaId");
@@ -24,7 +25,7 @@ class ApiService {
     }
   }
 
-  // UPDATED METHOD: Now accepts optional patientHistory
+  // METHOD 2: Triage Result (Phase 1 to 5)
   Future<TriageModel> getTriageResult(String symptoms, String language, {Map<String, dynamic>? patientHistory}) async {
     try {
       // Build dynamic payload
@@ -58,6 +59,39 @@ class ApiService {
         severity: "GREEN",
         action: "Check if Laptop Server is running and IP is correct.",
       );
+    }
+  }
+
+  // ==========================================
+  // PHASE 6: CONSULTATION SCRIBE METHOD
+  // ==========================================
+  Future<String?> generateScribeReport(String transcript, String language) async {
+    try {
+      // Build payload for scribe
+      Map<String, dynamic> payload = {
+        "transcript": transcript,
+        "language": language,
+      };
+
+      // Inject ABHA history if available (taaki Doctor ko purani bimariyan pata chal jaye)
+      if (currentPatientProfile != null) {
+        payload["patient_history"] = currentPatientProfile;
+      }
+
+      final response = await _dio.post(
+        "$_apiUrl/generate_scribe",
+        data: payload,
+      );
+
+      if (response.statusCode == 200 && response.data['status'] == 'success') {
+        return response.data['scribe_report'];
+      } else {
+        print("Scribe Server Error: ${response.data}");
+        return null;
+      }
+    } catch (e) {
+      print("Scribe API Connection Error: $e");
+      return null;
     }
   }
 }

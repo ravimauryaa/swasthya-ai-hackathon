@@ -104,6 +104,47 @@ async def triage_symptoms(user_input: SymptomInput):
         print(f"Error: {e}")
         return {"status": "error", "ai_response": {"severity": "YELLOW", "action": "Local Server Error: " + str(e)}}
 
+
+# ==========================================
+# PHASE 6: CONSULTATION (AI SCRIBE) ENDPOINT
+# ==========================================
+class ScribeRequest(BaseModel):
+    transcript: str
+    language: str = "English"
+    patient_history: Optional[Dict[str, Any]] = None
+
+@app.post("/generate_scribe")
+async def generate_medical_scribe(req: ScribeRequest):
+    try:
+        # Prompt Engineering: The AI Scribe Persona
+        prompt = f"""
+        You are an expert Clinical Medical Scribe. 
+        Your job is to take a raw, unstructured transcript from a patient and convert it into a professional, structured History of Present Illness (HPI) report for a doctor.
+        
+        Patient Transcript: "{req.transcript}"
+        Language Spoken: {req.language}
+        Patient Profile Data: {req.patient_history}
+        
+        Generate the report strictly in this format:
+        **Chief Complaint (CC):** (1 sentence summary)
+        
+        **History of Present Illness (HPI):** (Professional medical paragraph covering Onset, Location, Duration, Character, Aggravating/Alleviating factors if mentioned)
+        
+        **Key Symptoms:** (Bullet points)
+        
+        Keep it concise, professional, and ready for a doctor to read in 15 seconds. Do not invent details that the patient didn't mention.
+        """
+        
+        # Using the globally defined Gemini 2.5 Flash model
+        response = model.generate_content(prompt)
+        
+        return {
+            "status": "success",
+            "scribe_report": response.text.strip()
+        }
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
