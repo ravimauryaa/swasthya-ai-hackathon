@@ -1,0 +1,16 @@
+# OS generated files
+.DS_Store
+
+# Frontend
+swasthya_ai_app/.dart_tool/
+swasthya_ai_app/.flutter-plugins
+swasthya_ai_app/.flutter-plugins-dependencies
+swasthya_ai_app/.packages
+swasthya_ai_app/build/
+swasthya_ai_app/android/key.properties
+swasthya_ai_app/ios/Flutter/Flutter.podspec
+
+# Backend API keys & Environments
+swasthya_ai_backend/.env
+swasthya_ai_backend/venv/
+swasthya_ai_backend/__pycache__/
