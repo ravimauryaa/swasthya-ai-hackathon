@@ -1,16 +1,16 @@
 # 🏥 SwasthyaAI: Intelligent Medical Triage System
 
-**SwasthyaAI** ek AI-powered diagnostic and triage solution hai jo users ko unke symptoms ke basis par real-time medical advice aur severity assessments provide karta hai. Iska goal emergency cases (RED) aur general symptoms (GREEN) ke beech ka gap kam karna hai.
+**SwasthyaAI** is an AI-powered diagnostic and triage solution that provides users with real-time medical advice and severity assessments based on their symptoms. Its goal is to bridge the gap between emergency cases (RED) and general symptoms (GREEN).
 
 ---
 
 ## 🚀 Key Features
 
-- **Smart Triage Engine**: Gemini 2.5 Flash ka use karke symptoms ko RED, YELLOW, aur GREEN categories mein classify karta hai.
-- **Agentic RAG Architecture**: Pinecone Vector Database aur `all-mpnet-base-v2` embeddings ka use karke verified medical guidelines fetch karta hai.
-- **Multilingual Support**: Hinglish/Hindi support taaki common users ko samajhne mein aasani ho.
-- **Voice Input**: `speech_to_text` se symptoms bolkar bhi enter kar sakte hain.
-- **High-Speed Local Hosting**: Latency kam karne ke liye server Mac M1 par local network par host kiya gaya hai.
+- **Smart Triage Engine**: Uses Gemini 2.5 Flash to classify symptoms into RED, YELLOW, and GREEN categories.
+- **Agentic RAG Architecture**: Fetches verified medical guidelines using Pinecone Vector Database and `all-mpnet-base-v2` embeddings.
+- **Multilingual Support**: Supports Hindi/Hinglish responses so common users can easily understand the advice.
+- **Voice Input**: Users can speak their symptoms using the `speech_to_text` integration.
+- **High-Speed Local Hosting**: Server is hosted on a local network (Mac M1) to minimize latency.
 
 ---
 
@@ -48,19 +48,19 @@ User Input (Text/Voice)
 
 ### Backend
 
-1. `.env` file banayein:
+1. Create a `.env` file:
    ```env
    GEMINI_API_KEY=YOUR_GEMINI_KEY
    PINECONE_API_KEY=YOUR_PINECONE_KEY
    ```
 
-2. Dependencies install karein:
+2. Install dependencies:
    ```bash
    cd swasthya_ai_backend
    pip install -r requirements.txt
    ```
 
-3. Server start karein:
+3. Start the server:
    ```bash
    python main.py
    # Server runs at http://0.0.0.0:8000
@@ -68,15 +68,15 @@ User Input (Text/Voice)
 
 ### Flutter App
 
-1. Dependencies install karein:
+1. Install dependencies:
    ```bash
    cd swasthya_ai_app
    flutter pub get
    ```
 
-2. `lib/services/api_service.dart` mein apna local server IP set karein.
+2. Set your local server IP in `lib/services/api_service.dart`.
 
-3. App run karein:
+3. Run the app:
    ```bash
    flutter run
    ```
@@ -101,7 +101,7 @@ User Input (Text/Voice)
   "status": "success",
   "ai_response": {
     "severity": "RED",
-    "action": "तुरंत नजदीकी अस्पताल जाएं।"
+    "action": "Go to the nearest hospital immediately."
   }
 }
 ```
