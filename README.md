@@ -6,19 +6,29 @@
 
 ## 🚀 Key Features
 
-*   **Smart Triage Engine**: Gemini 2.5 Flash ka use karke symptoms ko RED, YELLOW, aur GREEN categories mein classify karta hai.
-*   **Agentic RAG Architecture**: Pinecone Vector Database aur `all-mpnet-base-v2` embeddings ka use karke verified medical guidelines fetch karta hai.
-*   **Multilingual Support**: App aur Backend dono Hinglish/Hindi support karte hain taaki common users ko samajhne mein aasani ho.
-*   **High-Speed Local Hosting**: Latency kam karne ke liye server ko Mac M1 par local network par host kiya gaya hai.
+- **Smart Triage Engine**: Gemini 2.5 Flash ka use karke symptoms ko RED, YELLOW, aur GREEN categories mein classify karta hai.
+- **Agentic RAG Architecture**: Pinecone Vector Database aur `all-mpnet-base-v2` embeddings ka use karke verified medical guidelines fetch karta hai.
+- **Multilingual Support**: Hinglish/Hindi support taaki common users ko samajhne mein aasani ho.
+- **Voice Input**: `speech_to_text` se symptoms bolkar bhi enter kar sakte hain.
+- **High-Speed Local Hosting**: Latency kam karne ke liye server Mac M1 par local network par host kiya gaya hai.
 
 ---
 
 ## 🏗️ System Architecture
 
-1.  **User Input**: User symptoms aur preferred language select karta hai.
-2.  **Vector Search**: Backend (FastAPI) user input ko embed karke Pinecone se relevant verified medical data nikalta hai.
-3.  **AI Reasoning**: Gemini AI fetch kiye gaye data aur symptoms ko combine karke final advice generate karta hai.
-4.  **Mobile Output**: Flutter app JSON response ko decode karke visual alert (Red/Yellow/Green) show karti hai.
+```
+User Input (Text/Voice)
+        ↓
+  Flutter App (Dio)
+        ↓
+  FastAPI Backend
+    ├── Agent 1: Pinecone Vector Search (all-mpnet-base-v2)
+    └── Agent 2: Gemini 2.5 Flash Reasoning
+        ↓
+  JSON Response { severity, action }
+        ↓
+  Visual Alert (🔴 RED / 🟡 YELLOW / 🟢 GREEN)
+```
 
 ---
 
@@ -26,18 +36,98 @@
 
 | Layer | Technology |
 | :--- | :--- |
-| **Mobile Frontend** | Flutter (Dart) |
+| **Mobile Frontend** | Flutter (Dart) — `dio`, `provider`, `speech_to_text`, `google_fonts` |
 | **API Backend** | FastAPI (Python) |
-| **AI Models** | Google Gemini 2.5 Flash, Sentence-Transformers |
-| **Vector DB** | Pinecone |
-| **DevOps** | Local Server (Uvicorn), Git/GitHub |
+| **AI Models** | Google Gemini 2.5 Flash, `sentence-transformers/all-mpnet-base-v2` |
+| **Vector DB** | Pinecone (`swasthya-db` index) |
+| **DevOps** | Uvicorn on `0.0.0.0:8000`, Git/GitHub |
 
 ---
 
 ## 💻 Installation & Setup
 
-### Backend (swasthya_ai_backend)
-1. Environment variables set karein (`.env` file):
+### Backend
+
+1. `.env` file banayein:
    ```env
-   GEMINI_API_KEY=YOUR_KEY
-   PINECONE_API_KEY=YOUR_KEY
+   GEMINI_API_KEY=YOUR_GEMINI_KEY
+   PINECONE_API_KEY=YOUR_PINECONE_KEY
+   ```
+
+2. Dependencies install karein:
+   ```bash
+   cd swasthya_ai_backend
+   pip install -r requirements.txt
+   ```
+
+3. Server start karein:
+   ```bash
+   python main.py
+   # Server runs at http://0.0.0.0:8000
+   ```
+
+### Flutter App
+
+1. Dependencies install karein:
+   ```bash
+   cd swasthya_ai_app
+   flutter pub get
+   ```
+
+2. `lib/services/api_service.dart` mein apna local server IP set karein.
+
+3. App run karein:
+   ```bash
+   flutter run
+   ```
+
+---
+
+## 📡 API Reference
+
+### `POST /api/triage`
+
+**Request:**
+```json
+{
+  "text": "chest pain and shortness of breath",
+  "language": "Hindi"
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "ai_response": {
+    "severity": "RED",
+    "action": "तुरंत नजदीकी अस्पताल जाएं।"
+  }
+}
+```
+
+**Severity Levels:**
+| Level | Meaning |
+| :--- | :--- |
+| 🔴 RED | Emergency — immediate medical attention needed |
+| 🟡 YELLOW | Moderate — consult a doctor soon |
+| 🟢 GREEN | Mild — home care / OPD visit |
+
+---
+
+## 📁 Project Structure
+
+```
+swasthya_ai/
+├── swasthya_ai_backend/
+│   ├── main.py          # FastAPI app with triage endpoint
+│   ├── seed_data.py     # Pinecone data seeding script
+│   ├── requirements.txt
+│   └── .env
+└── swasthya_ai_app/
+    └── lib/
+        ├── main.dart
+        ├── features/    # home_screen, result_screen, main_layout
+        ├── models/      # triage_model.dart
+        └── services/    # api_service.dart
+```
