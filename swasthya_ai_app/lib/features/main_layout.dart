@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'home_screen.dart'; 
 import 'abha_screen.dart'; 
-import 'profile_screen.dart'; // 👈 YEH NAYA IMPORT ADD KIYA
+import 'profile_screen.dart'; 
 
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
