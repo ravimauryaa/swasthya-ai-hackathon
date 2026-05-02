@@ -17,7 +17,7 @@ app = FastAPI(title="SwasthyaAI Local Pro Backend")
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 model = genai.GenerativeModel('gemini-2.5-flash')
 
-# Setup Pinecone & Local Embedding Model
+# Setup Pinecone Local Embedding Model
 pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
 index = pc.Index("swasthya-db")
 embedder = SentenceTransformer('all-mpnet-base-v2') 
