@@ -13,11 +13,23 @@ load_dotenv()
 
 app = FastAPI(title="SwasthyaAI Local Pro Backend")
 
-# Setup Gemini
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+# ==========================================
+# GEMINI SETUP (With Auto-Fixer for API Key)
+# ==========================================
+raw_api_key = os.getenv("GEMINI_API_KEY", "")
+# Nayi key se extra spaces aur quotes hatane ka logic
+clean_api_key = raw_api_key.strip().strip('"').strip("'") 
+
+# Terminal me check karne ke liye ki key sahi load hui ya nahi (Starting ke 10 characters)
+print(f"DEBUG - Meri Asli Key Yahan Se Shuru Hoti Hai: '{clean_api_key[:10]}...'") 
+
+genai.configure(api_key=clean_api_key)
+# Free tier ke liye sabse best aur fast model
 model = genai.GenerativeModel('gemini-2.5-flash')
 
-# Setup Pinecone Local Embedding Model
+# ==========================================
+# PINECONE & RAG SETUP
+# ==========================================
 pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
 index = pc.Index("swasthya-db")
 embedder = SentenceTransformer('all-mpnet-base-v2') 
@@ -55,7 +67,7 @@ async def triage_symptoms(user_input: SymptomInput):
     try:
         target_lang = user_input.language
         
-        # AGENT 1: Local Vector Search
+        # AGENT 1: Local Vector Search (RAG)
         user_vector = embedder.encode(user_input.text).tolist()
         search_result = index.query(vector=user_vector, top_k=1, include_metadata=True)
         
