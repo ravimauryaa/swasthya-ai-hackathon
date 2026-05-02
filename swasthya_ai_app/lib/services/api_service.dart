@@ -2,19 +2,45 @@ import 'package:dio/dio.dart';
 import '../models/triage_model.dart';
 
 class ApiService {
+  // GLOBAL VARIABLE: Yeh ABHA aur Home screen ke beech data share karega
+  static Map<String, dynamic>? currentPatientProfile;
+
   final Dio _dio = Dio();
   
-  // REPLACE '192.168.x.x' with your actual Laptop IP Address
-final String _apiUrl = "http://10.132.200.129:8000/api/triage";
+  // REPLACE with your actual Laptop IP Address
+  final String _apiUrl = "http://10.132.200.129:8000"; 
 
-  Future<TriageModel> getTriageResult(String symptoms, String language) async {
+  // NEW METHOD: Fetch ABHA Profile
+  Future<Map<String, dynamic>?> fetchPatientHistory(String abhaId) async {
     try {
+      final response = await _dio.get("$_apiUrl/api/v1/abha/patient/$abhaId");
+      if (response.statusCode == 200) {
+        return response.data['data'];
+      }
+      return null;
+    } catch (e) {
+      print("ABHA Fetch Error: $e");
+      return null;
+    }
+  }
+
+  // UPDATED METHOD: Now accepts optional patientHistory
+  Future<TriageModel> getTriageResult(String symptoms, String language, {Map<String, dynamic>? patientHistory}) async {
+    try {
+      // Build dynamic payload
+      Map<String, dynamic> payload = {
+        "text": symptoms,
+        "language": language,
+      };
+      
+      // Inject history if available
+      if (patientHistory != null) {
+        payload["patient_history"] = patientHistory;
+      }
+
       final response = await _dio.post(
-        _apiUrl,
-        data: {
-          "text": symptoms,
-          "language": language,
-        },
+        "$_apiUrl/api/triage",
+        data: payload,
       );
 
       if (response.statusCode == 200) {

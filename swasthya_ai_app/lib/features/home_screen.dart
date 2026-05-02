@@ -7,7 +7,8 @@ import '../services/api_service.dart';
 import 'result_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  // Removed const to allow rebuilding when tab switches
+  HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -66,29 +67,27 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     FocusScope.of(context).unfocus(); 
-
     setState(() => _isLoading = true);
 
     try {
       String requestedLanguage = _selectedLocaleId == 'hi_IN' ? 'Hindi' : 'English';
       
+      // Global Profile Data Backend Ko Bheja Ja Raha Hai
       TriageModel result = await _apiService.getTriageResult(
         _symptomController.text, 
-        requestedLanguage
+        requestedLanguage,
+        patientHistory: ApiService.currentPatientProfile, 
       );
       
       setState(() => _isLoading = false);
 
       if (mounted) {
-        // Navigation with a callback to clear the text after returning
         await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => ResultScreen(triageResult: result),
           ),
         );
-        
-        // Logic: Clear the chat transcript after the user comes back from Result Screen
         setState(() {
           _symptomController.clear();
         });
@@ -105,6 +104,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Check if profile is linked
+    bool isProfileLinked = ApiService.currentPatientProfile != null;
+
     return SafeArea(
       child: Stack(
         children: [
@@ -128,8 +130,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // DYNAMIC NAME LOGIC
                             Text(
-                              _selectedLocaleId == 'hi_IN' ? "नमस्ते, रमेश" : "Namaste, Ramesh",
+                              _selectedLocaleId == 'hi_IN' 
+                                  ? "नमस्ते, ${isProfileLinked ? ApiService.currentPatientProfile!['name'].split(' ')[0] : 'उपयोगकर्ता'}" 
+                                  : "Namaste, ${isProfileLinked ? ApiService.currentPatientProfile!['name'].split(' ')[0] : 'User'}",
                               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: Colors.black87),
                             ),
                             Text(
@@ -147,7 +152,35 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
                 
-                const SizedBox(height: 40),
+                const SizedBox(height: 20),
+
+                // DYNAMIC BADGE LOGIC
+                if (isProfileLinked)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF0FDF4),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.green.shade300),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.verified_user, color: Colors.green, size: 18),
+                        const SizedBox(width: 8),
+                        Text(
+                          "Linked: ${ApiService.currentPatientProfile!['name']}",
+                          style: TextStyle(
+                            color: Colors.green.shade800, 
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                const SizedBox(height: 30),
 
                 Container(
                   padding: const EdgeInsets.all(30),
@@ -307,7 +340,6 @@ class _HomeScreenState extends State<HomeScreen> {
       onTap: () {
         setState(() {
           _selectedLocaleId = localeId;
-          // Logic: Clear the text when user switches language to start fresh context
           _symptomController.clear();
           if (_isListening) {
             _isListening = false;

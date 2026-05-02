@@ -1,6 +1,6 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart'; // Naya package
+import 'package:google_fonts/google_fonts.dart'; 
 import 'features/main_layout.dart';
 
 void main() {
@@ -16,13 +16,13 @@ class SwasthyaApp extends StatelessWidget {
       title: 'SwasthyaAI',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        // Ab app Google Fonts use karegi
+        // Premium Google Fonts Typography
         textTheme: GoogleFonts.outfitTextTheme(Theme.of(context).textTheme),
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0F766E)), // Premium Teal
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0F766E)), 
         useMaterial3: true,
         scaffoldBackgroundColor: const Color(0xFFF7F9FC), 
       ),
-      // App ab sidha MainLayout khulegi jisme bottom bar hai
+      // App sidha MainLayout khulegi jahan humara naya bottom bar navigation hai
       home: const MainLayout(), 
     );
   }
