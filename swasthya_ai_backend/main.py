@@ -8,7 +8,7 @@ from pinecone import Pinecone
 from sentence_transformers import SentenceTransformer
 import json
 
-# Load .env for API Keys
+# Load .env to API Keys
 load_dotenv()
 
 app = FastAPI(title="SwasthyaAI Local Pro Backend")

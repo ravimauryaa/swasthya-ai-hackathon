@@ -9,7 +9,7 @@ class ApiService {
   final Dio _dio = Dio();
   
   // REPLACE with your actual Laptop IP Address
-  final String _apiUrl = "https://swasthya-ai-hackathon.onrender.com"; 
+final String _apiUrl = "https://unsent-yearbook-grub.ngrok-free.dev";
 
   // METHOD 1: Fetch ABHA Profile
   Future<Map<String, dynamic>?> fetchPatientHistory(String abhaId) async {
